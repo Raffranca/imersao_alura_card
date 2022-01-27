@@ -68,9 +68,9 @@ export default function PaginaInicial() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: appConfig.theme.colors.primary[500],
+                    //backgroundColor: appConfig.theme.colors.primary[500],
                     backgroundImage:
-                        "url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)",
+                        "url(https://i0.wp.com/oquartonerd.com.br/wp-content/uploads/2020/02/mulher-maravilha-1984-filme-ganha-primeiro-teaser-e-anuncia-trailer_f.jpg?w=1200&ssl=1)",
                     backgroundRepeat: "no-repeat",
                     backgroundSize: "cover",
                     backgroundBlendMode: "multiply",
@@ -91,7 +91,7 @@ export default function PaginaInicial() {
                         padding: "32px",
                         margin: "16px",
                         boxShadow: "0 2px 10px 0 rgb(0 0 0 / 20%)",
-                        backgroundColor: appConfig.theme.colors.neutrals[700],
+                        //backgroundColor: appConfig.theme.colors.neutrals[700],
                     }}
                 >
                     {/* Formulário */}
@@ -112,7 +112,7 @@ export default function PaginaInicial() {
                             variant="body3"
                             styleSheet={{
                                 marginBottom: "32px",
-                                color: appConfig.theme.colors.neutrals['300'],
+                                color: appConfig.theme.colors.neutrals['999'],
                             }}
                         >
                             {appConfig.name}
@@ -151,7 +151,7 @@ export default function PaginaInicial() {
                             alignItems: "center",
                             maxWidth: "200px",
                             padding: "16px",
-                            backgroundColor: appConfig.theme.colors.neutrals[800],
+                            //backgroundColor: appConfig.theme.colors.neutrals[800],
                             border: "1px solid",
                             borderColor: appConfig.theme.colors.neutrals[999],
                             borderRadius: "10px",
