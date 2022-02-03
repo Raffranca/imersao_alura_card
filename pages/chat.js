@@ -1,22 +1,85 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
 import appConfig from '../config.json';
+import { useRouter } from 'next/router';
+import { createClient } from '@supabase/supabase-js'
+import { ButtonSendSticker } from '../src/componets/ButtonSendSticker';
+
+const SUPABASE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0Mzg0NjUwOSwiZXhwIjoxOTU5NDIyNTA5fQ.r_mnzl29WHIxk8wwzEdCOgw8JMnfbreBPQ2jErBPItA';
+const URL = 'https://vscvlmbrjexmchydgedb.supabase.co';
+const SUPAclient = createClient(URL, SUPABASE);
+
+function escutaMensagensEmTempoReal(adicionaMensagem) {
+    return SUPAclient
+        .from('mensagens')
+        .on('INSERT', (respostaLive) => {
+            adicionaMensagem(respostaLive.new);
+        })
+        .subscribe();
+}
+
 
 export default function ChatPage() {
     // Sua lógica vai aqui
+    const router = useRouter();
+    const usuarioLogado = router.query.username;
     const [mensagem, setMensagem] = React.useState('');
     const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+    
+    React.useEffect(()=>{
+        SUPAclient
+            .from('mensagens card')
+            .select('*')
+            .order('id', {ascending: false})
+            .then(({data})=>{
+                //console.log(data);
+                setListaDeMensagens(data);
+            });
+    
+
+    const subscription = escutaMensagensEmTempoReal((novaMensagem) => {
+        console.log('Nova mensagem:', novaMensagem);
+        console.log('listaDeMensagens:', listaDeMensagens);
+        // Quero reusar um valor de referencia (objeto/array) 
+        // Passar uma função pro setState
+
+        // setListaDeMensagens([
+        //     novaMensagem,
+        //     ...listaDeMensagens
+        // ])
+        setListaDeMensagens((valorAtualDaLista) => {
+            console.log('valorAtualDaLista:', valorAtualDaLista);
+            return [
+                novaMensagem,
+                ...valorAtualDaLista,
+            ]
+        });
+    });
+
+        return () => {
+            subscription.unsubscribe();
+        } 
+    }, []);
 
     function handleNovaMensagem(novaMensagem){
         const mensagem = {
-            id: listaDeMensagens.length + 1,
-            de: 'vanessametonini',
+            //id: listaDeMensagens.length + 1,
+            de: usuarioLogado,
             texto: novaMensagem,
         }
-        setListaDeMensagens([
-            mensagem,
-            ...listaDeMensagens,
-        ]);
+
+        SUPAclient
+            .from('mensagens')
+            .insert([
+                mensagem
+            ])
+            .then(({data})=>{
+                /*setListaDeMensagens([
+                    data[0],
+                    ...listaDeMensagens,
+                ]);*/
+            })
+
         setMensagem('');
     }
 
@@ -25,8 +88,8 @@ export default function ChatPage() {
         <Box
             styleSheet={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                backgroundColor: appConfig.theme.colors.primary[500],
-                backgroundImage: `url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)`,
+                //backgroundColor: appConfig.theme.colors.primary[500],
+                backgroundImage: `url(https://i0.wp.com/oquartonerd.com.br/wp-content/uploads/2020/02/mulher-maravilha-1984-filme-ganha-primeiro-teaser-e-anuncia-trailer_f.jpg?w=1200&ssl=1)`,
                 backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
                 color: appConfig.theme.colors.neutrals['000']
             }}
@@ -38,7 +101,7 @@ export default function ChatPage() {
                     flex: 1,
                     boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
                     borderRadius: '5px',
-                    backgroundColor: appConfig.theme.colors.neutrals[700],
+                    backgroundColor: appConfig.theme.colors.neutrals[350],
                     height: '100%',
                     maxWidth: '95%',
                     maxHeight: '95vh',
@@ -52,7 +115,7 @@ export default function ChatPage() {
                         display: 'flex',
                         flex: 1,
                         height: '80%',
-                        backgroundColor: appConfig.theme.colors.neutrals[600],
+                        //backgroundColor: appConfig.theme.colors.neutrals[350],
                         flexDirection: 'column',
                         borderRadius: '5px',
                         padding: '16px',
@@ -93,6 +156,12 @@ export default function ChatPage() {
                                 backgroundColor: appConfig.theme.colors.neutrals[800],
                                 marginRight: '12px',
                                 color: appConfig.theme.colors.neutrals[200],
+                            }}
+                        />
+                        <ButtonSendSticker
+                            onStickerClick={(sticker) => {
+                // console.log('[USANDO O COMPONENTE] Salva esse sticker no banco', sticker);
+                            handleNovaMensagem(':sticker: ' + sticker);
                             }}
                         />
                     </Box>
@@ -161,7 +230,7 @@ function MessageList(props) {
                                 display: 'inline-block',
                                 marginRight: '8px',
                             }}
-                            src={`https://github.com/vanessametonini.png`}
+                            src={`https://github.com/${mensagem.de}.png`}
                         />
                         <Text tag="strong">
                             {mensagem.de}
@@ -177,7 +246,13 @@ function MessageList(props) {
                             {(new Date().toLocaleDateString())}
                         </Text>
                     </Box>
-                    {mensagem.texto}
+                    {mensagem.texto.startsWith(':sticker:')
+                        ? (
+                            <Image src={mensagem.texto.replace(':sticker:', '')} />
+                        )
+                        : (
+                mensagem.texto
+                )}
                 </Text>
                 );
             })}

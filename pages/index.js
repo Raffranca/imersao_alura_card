@@ -77,7 +77,7 @@ export default function PaginaInicial() {
                         as="form"
                         onSubmit={function(infosDoEvento){
                             infosDoEvento.preventDefault();
-                            router.push('/chat');
+                            router.push(`/chat?username=${username}`);
                             /*metodo de roteamento padrão
                             window.location.href = '/chat';*/
                         }}
